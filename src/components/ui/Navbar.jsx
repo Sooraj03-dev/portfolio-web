@@ -39,6 +39,17 @@ export default function Navbar({ terminalOpen, onToggleTerminal, isPlaying, togg
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Ambient Firewall Integrity logic
+  const [fwIntegrity, setFwIntegrity] = useState(99.8);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // randomly tick between 97.5 and 99.9
+      const newFw = 97.5 + Math.random() * 2.4;
+      setFwIntegrity(newFw.toFixed(1));
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <>
       <nav
@@ -90,7 +101,21 @@ export default function Navbar({ terminalOpen, onToggleTerminal, isPlaying, togg
           </div>
 
           {/* Status Area */}
-          <div className="flex items-center gap-2 md:items-end md:gap-3">
+          <div className="flex items-center gap-2 md:items-end md:gap-4">
+            
+            {/* Ambient FW Meter */}
+            <div className="hidden sm:flex flex-col items-end justify-center mr-2">
+              <div className="font-jetbrains text-[9px] text-neon-cyan/70 tracking-widest uppercase mb-[2px]">
+                FW_INTEGRITY
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-16 h-1 bg-neon-cyan/20 overflow-hidden relative">
+                  <div className="absolute top-0 left-0 h-full bg-neon-cyan transition-all duration-300" style={{ width: `${fwIntegrity}%` }} />
+                </div>
+                <span className="font-jetbrains text-[10px] text-white tabular-nums w-[32px] text-right">{fwIntegrity}%</span>
+              </div>
+            </div>
+
             <button
               type="button"
               className="clickable cyber-navbar-logo-btn"

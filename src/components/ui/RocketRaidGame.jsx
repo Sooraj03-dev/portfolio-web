@@ -19,7 +19,7 @@ export default function RocketRaidGame({ onExit }) {
   const stateRef = useRef({
     width: 0,
     height: 0,
-    player: { x: 0, y: 0, width: 24, height: 32, vx: 0, vy: 0, speed: 0.5, drag: 0.86, lives: 3, invulnTimer: 0, lastFire: 0 },
+    player: { x: 0, y: 0, width: 24, height: 32, vx: 0, vy: 0, speed: 0.8, drag: 0.88, lives: 3, invulnTimer: 0, lastFire: 0 },
     projectiles: [],
     enemies: [],
     particles: [],
@@ -27,7 +27,7 @@ export default function RocketRaidGame({ onExit }) {
     score: 0,
     timeElapsed: 0,
     lastEnemySpawn: 0,
-    baseSpawnRate: 1200, // ms
+    baseSpawnRate: 700, // ms
     gameOver: false,
     scoreSaved: false
   });
@@ -169,15 +169,15 @@ export default function RocketRaidGame({ onExit }) {
 
     // --- Player Firing ---
     const isFiring = keysRef.current.space || touchRef.current.firing;
-    if (isFiring && timestamp - player.lastFire > 180) {
-      projectiles.push({ x: player.x, y: player.y - 10, width: 4, height: 12, speed: -8, type: 'player' });
+    if (isFiring && timestamp - player.lastFire > 90) {
+      projectiles.push({ x: player.x, y: player.y - 10, width: 4, height: 12, speed: -16, type: 'player' });
       player.lastFire = timestamp;
       playSound('shoot');
     }
 
     // --- Starfield ---
     stars.forEach(star => {
-      star.y += star.speed * (delta / 16);
+      star.y += star.speed * 3.5 * (delta / 16);
       if (star.y > height) {
         star.y = 0;
         star.x = Math.random() * width;
@@ -193,7 +193,7 @@ export default function RocketRaidGame({ onExit }) {
 
     // --- Enemies ---
     // Spawn logic
-    const currentSpawnRate = Math.max(400, s.baseSpawnRate * Math.pow(0.98, s.timeElapsed / 10000));
+    const currentSpawnRate = Math.max(150, s.baseSpawnRate * Math.pow(0.95, s.timeElapsed / 10000));
     if (timestamp - s.lastEnemySpawn > currentSpawnRate) {
       if (Math.random() < 0.15) spawnAsteroid();
       else spawnEnemy(timestamp);
@@ -204,24 +204,24 @@ export default function RocketRaidGame({ onExit }) {
       const e = enemies[i];
       
       if (e.type === 'ASTEROID') {
-        e.x += e.vx * (delta/16);
-        e.y += e.vy * (delta/16);
-        e.angle += e.rotSpeed;
+        e.x += e.vx * 1.5 * (delta/16);
+        e.y += e.vy * 2.0 * (delta/16);
+        e.angle += e.rotSpeed * 1.5;
       } else {
         const age = timestamp - e.spawnTime;
-        e.y += (e.type === 'C' ? 0.8 : e.type === 'B' ? 1.5 : 2.5) * (delta/16);
+        e.y += (e.type === 'C' ? 1.5 : e.type === 'B' ? 3.0 : 5.0) * (delta/16);
         
         if (e.type === 'B') {
-          e.x += Math.sin(age * 0.003) * 2;
-          if (timestamp - e.lastFire > 2000) {
-            projectiles.push({ x: e.x, y: e.y + e.height/2, width: 4, height: 12, speed: 6, type: 'enemy' });
+          e.x += Math.sin(age * 0.005) * 3;
+          if (timestamp - e.lastFire > 1200) {
+            projectiles.push({ x: e.x, y: e.y + e.height/2, width: 4, height: 12, speed: 10, type: 'enemy' });
             e.lastFire = timestamp;
           }
         } else if (e.type === 'C') {
-          if (timestamp - e.lastFire > 3000) {
-            projectiles.push({ x: e.x, y: e.y + e.height/2, width: 6, height: 12, speed: 4, type: 'enemy' });
-            projectiles.push({ x: e.x - 12, y: e.y + e.height/2, width: 6, height: 12, speed: 4, type: 'enemy', vx: -1.5 });
-            projectiles.push({ x: e.x + 12, y: e.y + e.height/2, width: 6, height: 12, speed: 4, type: 'enemy', vx: 1.5 });
+          if (timestamp - e.lastFire > 1800) {
+            projectiles.push({ x: e.x, y: e.y + e.height/2, width: 6, height: 12, speed: 7, type: 'enemy' });
+            projectiles.push({ x: e.x - 12, y: e.y + e.height/2, width: 6, height: 12, speed: 7, type: 'enemy', vx: -2.5 });
+            projectiles.push({ x: e.x + 12, y: e.y + e.height/2, width: 6, height: 12, speed: 7, type: 'enemy', vx: 2.5 });
             e.lastFire = timestamp;
           }
         }

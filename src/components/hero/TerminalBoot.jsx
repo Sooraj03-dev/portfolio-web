@@ -5,6 +5,7 @@ export default function TerminalBoot({ onComplete }) {
   const [lines, setLines] = useState([
     { text: '> INITIALIZING IDENTITY MODULE...', typed: '' },
     { text: '> LOADING PROFILE: SOORAJ_CHAKRAVARTHY_S', typed: '' },
+    { text: '> TRACING CONNECTION...', typed: '' },
     { text: '> ACCESS GRANTED', typed: '' }
   ]);
   const [activeLine, setActiveLine] = useState(0);
@@ -14,8 +15,28 @@ export default function TerminalBoot({ onComplete }) {
     let currentChar = 0;
     let typingInterval;
 
+    let currentLines = [
+      { text: '> INITIALIZING IDENTITY MODULE...', typed: '' },
+      { text: '> LOADING PROFILE: SOORAJ_CHAKRAVARTHY_S', typed: '' },
+      { text: '> TRACING CONNECTION...', typed: '' },
+      { text: '> ACCESS GRANTED', typed: '' }
+    ];
+
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        if (data.city && data.country) {
+          currentLines[2].text = `> CONNECTION TRACED: ${data.city.toUpperCase()}, ${data.country.toUpperCase()}`;
+        } else {
+          currentLines[2].text = '> CONNECTION TRACED: UNKNOWN ORIGIN';
+        }
+      })
+      .catch(() => {
+        currentLines[2].text = '> CONNECTION TRACED: UNKNOWN ORIGIN';
+      });
+
     const typeChar = () => {
-      if (currentLine >= lines.length) {
+      if (currentLine >= currentLines.length) {
         setTimeout(() => {
           gsap.to('.terminal-boot-container', {
             opacity: 0,
@@ -27,13 +48,12 @@ export default function TerminalBoot({ onComplete }) {
         return;
       }
 
-      const fullText = lines[currentLine].text;
+      const fullText = currentLines[currentLine].text;
+      
       if (currentChar < fullText.length) {
-        setLines(prev => {
-          const newLines = [...prev];
-          newLines[currentLine].typed = fullText.slice(0, currentChar + 1);
-          return newLines;
-        });
+        currentLines[currentLine].typed = fullText.slice(0, currentChar + 1);
+        setLines([...currentLines]);
+        
         currentChar++;
         
         const nextDelay = Math.random() * 30 + 20; 

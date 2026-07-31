@@ -6,9 +6,16 @@ function ScrambleChar({ char, delay, isStarted, onComplete }) {
   const [displayChar, setDisplayChar] = useState(char === ' ' ? '\u00A0' : '');
   const [isLocked, setIsLocked] = useState(false);
   const [isFlashing, setIsFlashing] = useState(false);
+  const hasCompleted = useRef(false);
   
   useEffect(() => {
-    if (!isStarted || char === ' ') return;
+    if (!isStarted || hasCompleted.current) return;
+    
+    if (char === ' ') {
+      hasCompleted.current = true;
+      if (onComplete) onComplete();
+      return;
+    }
     
     let scrambleInterval;
     let timeout;
@@ -29,6 +36,7 @@ function ScrambleChar({ char, delay, isStarted, onComplete }) {
         // Remove flash after a short time
         setTimeout(() => {
           setIsFlashing(false);
+          hasCompleted.current = true;
           if (onComplete) onComplete();
         }, 150);
         
@@ -57,15 +65,33 @@ export default function HeroName({ isStarted, onComplete }) {
   
   const totalChars = line1.length + line2.length;
   const completedCount = useRef(0);
+  const [isFullyResolved, setIsFullyResolved] = useState(false);
   
   const handleCharComplete = () => {
     completedCount.current += 1;
     if (completedCount.current === totalChars) {
+      setIsFullyResolved(true);
       if (onComplete) onComplete();
     }
   };
 
   const [idleGlitch, setIdleGlitch] = useState(false);
+  const [isHoverGlitchActive, setIsHoverGlitchActive] = useState(false);
+  const hoverTimeoutRef = useRef(null);
+
+  const handleMouseEnter = () => {
+    if (!isStarted || !isFullyResolved) return;
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsHoverGlitchActive(true);
+    }, 3000);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    setIsHoverGlitchActive(false);
+  };
 
   useEffect(() => {
     if (completedCount.current !== totalChars) return;
@@ -92,15 +118,17 @@ export default function HeroName({ isStarted, onComplete }) {
     ));
   };
 
-  const isFullyResolved = completedCount.current === totalChars;
-
   return (
     <div 
-      className={`relative inline-block hero-name text-left ${idleGlitch ? 'glitching-idle' : ''}`}
+      className={`relative inline-block hero-name text-left ${idleGlitch ? 'glitching-idle' : ''} ${isHoverGlitchActive ? 'glitching-intense' : ''} cursor-crosshair pointer-events-auto`}
       style={{
         transform: 'translate(calc(var(--mouse-x, 0) * -18px), calc(var(--mouse-y, 0) * -10px))',
         transition: 'transform 0.15s ease-out'
       }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onTouchStart={handleMouseEnter}
+      onTouchEnd={handleMouseLeave}
     >
       <h1 
         className="font-orbitron font-black uppercase m-0 flex flex-col leading-[0.9]"
@@ -142,6 +170,20 @@ export default function HeroName({ isStarted, onComplete }) {
           0% { transform: skewX(0deg); filter: hue-rotate(0deg); }
           50% { transform: skewX(-15deg); filter: hue-rotate(90deg); text-shadow: -2px 0 red, 2px 0 blue; }
           100% { transform: skewX(0deg); filter: hue-rotate(0deg); text-shadow: none; }
+        }
+
+        .hero-name.glitching-intense h1 {
+          animation: intenseGlitch 0.25s steps(2) infinite;
+          text-shadow: -4px 0 #FF2D78, 4px 0 #00FFFF;
+        }
+
+        @keyframes intenseGlitch {
+          0% { transform: skewX(0deg) translate(0); filter: hue-rotate(0deg) contrast(1); }
+          20% { transform: skewX(-20deg) translate(-5px, 2px); filter: hue-rotate(90deg) contrast(1.5); }
+          40% { transform: skewX(10deg) translate(3px, -3px); filter: hue-rotate(180deg) invert(0.2); }
+          60% { transform: skewX(-10deg) translate(-2px, 5px); filter: hue-rotate(270deg) contrast(1.2); }
+          80% { transform: skewX(20deg) translate(5px, -2px); filter: hue-rotate(45deg) invert(0.1); }
+          100% { transform: skewX(0deg) translate(0); filter: hue-rotate(0deg) contrast(1); }
         }
       `}</style>
     </div>

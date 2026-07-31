@@ -243,7 +243,7 @@ function LinkedInCard() {
   );
 }
 
-function TerminalWindow({ isOpen, onClose, onLaunchGame, systemMessage, clearSystemMessage }) {
+function TerminalWindow({ isOpen, onClose, onLaunchGame, systemMessage, clearSystemMessage, onSystemOverride }) {
   const [history, setHistory] = useState([makeBootEntry()]);
   const [input, setInput] = useState('');
   const [commandHistory, setCommandHistory] = useState([]);
@@ -1014,15 +1014,22 @@ function TerminalWindow({ isOpen, onClose, onLaunchGame, systemMessage, clearSys
       appendHistory({ id: spinnerId, kind: 'sync_spinner' });
 
       import('../../lib/supabase').then(async ({ supabase }) => {
-        const { data, error } = await supabase.from('projects').delete().eq('title', trimmed.trim()).select();
+        const target = trimmed.trim().toLowerCase();
+        const { data: items } = await supabase.from('projects').select('id, title');
+        const ids = (items || []).filter(i => i.title?.toLowerCase() === target).map(i => i.id);
         
-        if (error) {
-          updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> DELETE FAILED: ' + error.message }));
-        } else if (!data || data.length === 0) {
+        if (ids.length === 0) {
           updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> ERROR: PROJECT NOT FOUND.' }));
         } else {
-          updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'success', text: '> ✓ PROJECT REMOVED. Syncing archives...' }));
-          window.dispatchEvent(new CustomEvent('github-sync-pulse'));
+          const { data: deletedData, error } = await supabase.from('projects').delete().in('id', ids).select();
+          if (error) {
+            updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> DELETE FAILED: ' + error.message }));
+          } else if (!deletedData || deletedData.length === 0) {
+            updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> DELETE FAILED: NO ROWS REMOVED (CHECK SUPABASE RLS POLICY)' }));
+          } else {
+            updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'success', text: `> ✓ ${deletedData.length} PROJECT(S) REMOVED. Syncing archives...` }));
+            window.dispatchEvent(new CustomEvent('github-sync-pulse'));
+          }
         }
         setIsBusy(false);
       });
@@ -1039,14 +1046,22 @@ function TerminalWindow({ isOpen, onClose, onLaunchGame, systemMessage, clearSys
       appendHistory({ id: spinnerId, kind: 'sync_spinner' });
 
       import('../../lib/supabase').then(async ({ supabase }) => {
-        const { data, error } = await supabase.from('skills').delete().eq('name', trimmed.trim()).select();
-        if (error) {
-          updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> DELETE FAILED: ' + error.message }));
-        } else if (!data || data.length === 0) {
+        const target = trimmed.trim().toLowerCase();
+        const { data: items } = await supabase.from('skills').select('id, name');
+        const ids = (items || []).filter(i => i.name?.toLowerCase() === target).map(i => i.id);
+        
+        if (ids.length === 0) {
           updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> ERROR: SKILL NOT FOUND.' }));
         } else {
-          updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'success', text: '> ✓ SKILL REMOVED. Syncing matrix...' }));
-          window.dispatchEvent(new CustomEvent('skill-sync-pulse'));
+          const { data: deletedData, error } = await supabase.from('skills').delete().in('id', ids).select();
+          if (error) {
+            updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> DELETE FAILED: ' + error.message }));
+          } else if (!deletedData || deletedData.length === 0) {
+            updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> DELETE FAILED: NO ROWS REMOVED (CHECK SUPABASE RLS POLICY)' }));
+          } else {
+            updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'success', text: `> ✓ ${deletedData.length} SKILL(S) REMOVED. Syncing matrix...` }));
+            window.dispatchEvent(new CustomEvent('skill-sync-pulse'));
+          }
         }
         setIsBusy(false);
       });
@@ -1063,14 +1078,22 @@ function TerminalWindow({ isOpen, onClose, onLaunchGame, systemMessage, clearSys
       appendHistory({ id: spinnerId, kind: 'sync_spinner' });
 
       import('../../lib/supabase').then(async ({ supabase }) => {
-        const { data, error } = await supabase.from('timeline').delete().eq('title', trimmed.trim()).select();
-        if (error) {
-          updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> DELETE FAILED: ' + error.message }));
-        } else if (!data || data.length === 0) {
+        const target = trimmed.trim().toLowerCase();
+        const { data: items } = await supabase.from('timeline').select('id, title');
+        const ids = (items || []).filter(i => i.title?.toLowerCase() === target).map(i => i.id);
+        
+        if (ids.length === 0) {
           updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> ERROR: ACTIVITY NOT FOUND.' }));
         } else {
-          updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'success', text: '> ✓ ACTIVITY REMOVED. Syncing timeline...' }));
-          window.dispatchEvent(new CustomEvent('timeline-sync-pulse'));
+          const { data: deletedData, error } = await supabase.from('timeline').delete().in('id', ids).select();
+          if (error) {
+            updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> DELETE FAILED: ' + error.message }));
+          } else if (!deletedData || deletedData.length === 0) {
+            updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> DELETE FAILED: NO ROWS REMOVED (CHECK SUPABASE RLS POLICY)' }));
+          } else {
+            updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'success', text: `> ✓ ${deletedData.length} ACTIVITY(IES) REMOVED. Syncing timeline...` }));
+            window.dispatchEvent(new CustomEvent('timeline-sync-pulse'));
+          }
         }
         setIsBusy(false);
       });
@@ -1087,14 +1110,22 @@ function TerminalWindow({ isOpen, onClose, onLaunchGame, systemMessage, clearSys
       appendHistory({ id: spinnerId, kind: 'sync_spinner' });
 
       import('../../lib/supabase').then(async ({ supabase }) => {
-        const { data, error } = await supabase.from('skills').delete().eq('category', trimmed.trim()).select();
-        if (error) {
-          updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> DELETE FAILED: ' + error.message }));
-        } else if (!data || data.length === 0) {
+        const target = trimmed.trim().toLowerCase();
+        const { data: items } = await supabase.from('skills').select('id, category');
+        const ids = (items || []).filter(i => i.category?.toLowerCase() === target).map(i => i.id);
+        
+        if (ids.length === 0) {
           updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> ERROR: CATEGORY NOT FOUND.' }));
         } else {
-          updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'success', text: '> ✓ CATEGORY REMOVED. Syncing matrix...' }));
-          window.dispatchEvent(new CustomEvent('skill-sync-pulse'));
+          const { data: deletedData, error } = await supabase.from('skills').delete().in('id', ids).select();
+          if (error) {
+            updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> DELETE FAILED: ' + error.message }));
+          } else if (!deletedData || deletedData.length === 0) {
+            updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> DELETE FAILED: NO ROWS REMOVED (CHECK SUPABASE RLS POLICY)' }));
+          } else {
+            updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'success', text: `> ✓ ${deletedData.length} CATEGORY(IES) REMOVED. Syncing matrix...` }));
+            window.dispatchEvent(new CustomEvent('skill-sync-pulse'));
+          }
         }
         setIsBusy(false);
       });
@@ -1174,6 +1205,14 @@ function TerminalWindow({ isOpen, onClose, onLaunchGame, systemMessage, clearSys
     setHistoryIndex(-1);
     setInput('');
     setIsBusy(true);
+
+    if (trimmed === 'sudo rm -rf /') {
+      if (onSystemOverride) {
+        onSystemOverride();
+      }
+      setIsBusy(false);
+      return;
+    }
 
     if (trimmed === 'login') {
       const handshakeLines = [
@@ -1582,7 +1621,8 @@ function TerminalWindow({ isOpen, onClose, onLaunchGame, systemMessage, clearSys
 - whoami --deep  : Perform deep identity scan
 - sl             : 🚂
 - konami         : Enter cheat code
-- tweak <module> : Modules: neon, glitch, bass, coffee, gravity, empathy`
+- tweak <module> : Modules: neon, glitch, bass, coffee, gravity, empathy
+- sudo rm -rf /  : Trigger system override`
       });
       setIsBusy(false);
       return;
@@ -2157,7 +2197,7 @@ function ProfileCard() {
   );
 }
 
-export default function About({ terminalOpen, onOpenTerminal, onCloseTerminal, onLaunchGame, systemMessage, clearSystemMessage }) {
+export default function About({ terminalOpen, onOpenTerminal, onCloseTerminal, onLaunchGame, systemMessage, clearSystemMessage, onSystemOverride }) {
   const ref = useScrollReveal({ y: 30 });
 
   return (
@@ -2187,6 +2227,7 @@ export default function About({ terminalOpen, onOpenTerminal, onCloseTerminal, o
         onLaunchGame={onLaunchGame} 
         systemMessage={systemMessage}
         clearSystemMessage={clearSystemMessage}
+        onSystemOverride={onSystemOverride}
       />
     </section>
   );

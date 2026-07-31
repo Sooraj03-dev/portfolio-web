@@ -8,6 +8,15 @@ export default function Contact() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [captchaStatus, setCaptchaStatus] = useState('idle');
+
+  const handleCaptchaClick = () => {
+    if (captchaStatus !== 'idle') return;
+    setCaptchaStatus('verifying');
+    setTimeout(() => {
+      setCaptchaStatus('verified');
+    }, 1500);
+  };
 
   const fetchEmail = async () => {
     try {
@@ -86,8 +95,26 @@ export default function Contact() {
                 className="bg-[#010308] border border-neon-pink/30 text-text-primary p-3 font-share-tech outline-none focus:border-neon-pink focus:shadow-[0_0_10px_rgba(255,45,120,0.2)] transition-all resize-none"
               ></textarea>
             </div>
+            {/* Fake Captcha */}
+            <div className="flex items-center gap-4 p-4 bg-[#010308] border border-neon-pink/20 notch-card-br w-full sm:w-fit mt-2 select-none cursor-pointer group" onClick={handleCaptchaClick}>
+              <div 
+                className={`w-6 h-6 border flex items-center justify-center transition-all shrink-0 ${captchaStatus === 'verified' ? 'bg-neon-pink border-neon-pink' : 'border-neon-pink/50 group-hover:border-neon-pink'}`}
+              >
+                {captchaStatus === 'verifying' && <div className="w-3 h-3 border-2 border-neon-pink border-t-transparent rounded-full animate-spin" />}
+                {captchaStatus === 'verified' && <span className="text-white font-bold text-sm">✓</span>}
+              </div>
+              <div className="flex flex-col">
+                <span className="font-jetbrains text-xs sm:text-sm text-text-secondary">
+                  I am a recruiter
+                </span>
+                <div className="h-3 mt-1">
+                  {captchaStatus === 'verifying' && <span className="font-jetbrains text-[9px] text-neon-pink animate-pulse">VERIFYING...</span>}
+                  {captchaStatus === 'verified' && <span className="font-jetbrains text-[9px] text-neon-pink">✓ VERIFIED. (YOU WEREN'T ACTUALLY CHECKED.)</span>}
+                </div>
+              </div>
+            </div>
 
-            <button type="submit" disabled={formState !== 'idle'} className="notch-card-tr bg-neon-pink text-white font-orbitron font-bold tracking-widest py-4 hover:bg-white hover:text-neon-pink transition-all mt-4 disabled:opacity-50">
+            <button type="submit" disabled={formState !== 'idle' || captchaStatus !== 'verified'} className="notch-card-tr bg-neon-pink text-white font-orbitron font-bold tracking-widest py-4 hover:bg-white hover:text-neon-pink transition-all mt-4 disabled:opacity-50 disabled:hover:bg-neon-pink disabled:hover:text-white">
               {formState === 'idle' ? 'INITIATE TRANSFER' : formState === 'sending' ? 'TRANSMITTING...' : 'CONNECTION ESTABLISHED'}
             </button>
           </form>

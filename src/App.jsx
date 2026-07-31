@@ -3,7 +3,10 @@ import Navbar from './components/ui/Navbar';
 import CustomCursor from './components/ui/CustomCursor';
 import LoadingScreen from './components/ui/LoadingScreen';
 import Hero from './components/hero/Hero';
+import SystemOverrideHUD from './components/ui/SystemOverrideHUD';
 import RocketRaidGame from './components/ui/RocketRaidGame';
+import DrawCanvas from './components/ui/DrawCanvas';
+import { useFaviconPulse } from './hooks/useFaviconPulse';
 
 // Lazy load below-fold sections
 const Skills = lazy(() => import('./components/sections/Skills'));
@@ -16,12 +19,16 @@ const Footer = lazy(() => import('./components/sections/Footer'));
 export default function App() {
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [gameActive, setGameActive] = useState(false);
+  const [systemOverride, setSystemOverride] = useState(false);
   const [systemMessage, setSystemMessage] = useState(null);
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
 
   const [currentTrack, setCurrentTrack] = useState('/music1.mp3');
+
+  // Use the favicon pulse hook
+  useFaviconPulse(isPlaying);
 
   useEffect(() => {
     const armAutoplay = () => {
@@ -92,16 +99,59 @@ export default function App() {
   useEffect(() => {
     const handleDuck = () => {
       if (!audioRef.current || gameActive) return;
-      audioRef.current.volume = 0.15;
-      setTimeout(() => {
-        if (audioRef.current && !gameActive) {
-          audioRef.current.volume = 0.35;
+      
+      const startVolume = audioRef.current.volume;
+      const targetVolume = 0.1;
+      let startTime = performance.now();
+      
+      const duckDown = (time) => {
+        const elapsed = time - startTime;
+        const progress = Math.min(elapsed / 100, 1);
+        if (audioRef.current) {
+          audioRef.current.volume = startVolume - (startVolume - targetVolume) * progress;
         }
-      }, 1000);
+        if (progress < 1) {
+          requestAnimationFrame(duckDown);
+        }
+      };
+      requestAnimationFrame(duckDown);
+      
+      setTimeout(() => {
+        startTime = performance.now();
+        const duckUp = (time) => {
+          const elapsed = time - startTime;
+          const progress = Math.min(elapsed / 500, 1);
+          if (audioRef.current && !gameActive) {
+            audioRef.current.volume = targetVolume + (startVolume - targetVolume) * progress;
+          }
+          if (progress < 1) {
+            requestAnimationFrame(duckUp);
+          }
+        };
+        requestAnimationFrame(duckUp);
+      }, 1500); // Wait 1.5s then fade back up
     };
-    window.addEventListener('duck-audio', handleDuck);
-    return () => window.removeEventListener('duck-audio', handleDuck);
+    
+    window.addEventListener('sfx-duck', handleDuck);
+    return () => window.removeEventListener('sfx-duck', handleDuck);
   }, [gameActive]);
+
+  // Tab title easter egg
+  useEffect(() => {
+    const originalTitle = document.title || 'Sooraj | Portfolio';
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        document.title = "⚠ COME BACK...";
+      } else {
+        document.title = originalTitle;
+      }
+    };
+    
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   // Prevent hydration mismatch issues on load
   useEffect(() => {
@@ -109,9 +159,10 @@ export default function App() {
   }, []);
 
   return (
-    <div className="relative w-full min-h-screen bg-void text-text-primary selection:bg-neon-cyan/30">
+    <div className={`relative w-full min-h-screen bg-void text-text-primary selection:bg-neon-cyan/30 transition-all duration-300 ${systemOverride ? 'system-override' : ''}`}>
       <audio ref={audioRef} src={currentTrack} loop preload="auto" />
       <CustomCursor />
+      <DrawCanvas />
       <Navbar 
         terminalOpen={terminalOpen} 
         onToggleTerminal={() => setTerminalOpen((prev) => !prev)} 
@@ -132,6 +183,7 @@ export default function App() {
               setSystemMessage(null);
             }}
             onLaunchGame={() => setGameActive(true)}
+            onSystemOverride={() => setSystemOverride(true)}
             systemMessage={systemMessage}
             clearSystemMessage={() => setSystemMessage(null)}
           />
@@ -156,6 +208,10 @@ export default function App() {
             setTerminalOpen(true);
           }} 
         />
+      )}
+
+      {systemOverride && (
+        <SystemOverrideHUD onRestore={() => setSystemOverride(false)} />
       )}
     </div>
   );

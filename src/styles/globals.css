@@ -1,8 +1,8 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ── Global Reset ─────────────────────────────────────── */
+/* â”€â”€ Global Reset â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -24,26 +24,26 @@ body {
   cursor: none;
 }
 
-/* ── Scrollbar ───────────────────────────────────────── */
+/* â”€â”€ Scrollbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: #010308; }
 ::-webkit-scrollbar-thumb { background: #00FFFF44; border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: #00FFFF88; }
 
-/* ── Selection ───────────────────────────────────────── */
+/* â”€â”€ Selection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 ::selection {
   background: rgba(0, 255, 255, 0.2);
   color: #E8F4F8;
 }
 
-/* ── Cursor ──────────────────────────────────────────── */
+/* â”€â”€ Cursor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 a, button, input, textarea, select, .clickable {
   cursor: none;
 }
 
 img { display: block; max-width: 100%; }
 
-/* ── Neon text utilities ─────────────────────────────── */
+/* â”€â”€ Neon text utilities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .neon-text-cyan {
   color: #00FFFF;
   text-shadow:
@@ -60,7 +60,7 @@ img { display: block; max-width: 100%; }
     0 0 40px rgba(255,45,120,0.3);
 }
 
-/* ── Borders & notch cards ───────────────────────────── */
+/* â”€â”€ Borders & notch cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .neon-border {
   border: 1px solid rgba(0,255,255,0.25);
   box-shadow: inset 0 0 20px rgba(0,255,255,0.04);
@@ -74,12 +74,12 @@ img { display: block; max-width: 100%; }
   clip-path: polygon(12px 0, 100% 0, 100% 100%, 0 100%, 0 12px);
 }
 
-/* ── Hex clip ────────────────────────────────────────── */
+/* â”€â”€ Hex clip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .hex-clip {
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
 }
 
-/* ── Hero CTA buttons ─────────────────────────────────── */
+/* â”€â”€ Hero CTA buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .cyber-cta {
   min-width: 190px;
   justify-content: center;
@@ -313,7 +313,7 @@ img { display: block; max-width: 100%; }
     0 0 18px rgba(255,45,120,0.12);
 }
 
-/* ── Classified Intel terminal ───────────────────────── */
+/* â”€â”€ Classified Intel terminal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .terminal-shell {
   will-change: transform, filter;
 }
@@ -792,7 +792,7 @@ img { display: block; max-width: 100%; }
 
 
 
-/* ── CRT Scanlines overlay ───────────────────────────── */
+/* â”€â”€ CRT Scanlines overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .scanlines {
   pointer-events: none;
   position: fixed;
@@ -807,7 +807,7 @@ img { display: block; max-width: 100%; }
   );
 }
 
-/* ── Vignette overlay ────────────────────────────────── */
+/* â”€â”€ Vignette overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .vignette {
   pointer-events: none;
   position: fixed;
@@ -820,7 +820,7 @@ img { display: block; max-width: 100%; }
   );
 }
 
-/* ── Glitch classes ──────────────────────────────────── */
+/* â”€â”€ Glitch classes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .glitch-anim {
   animation: glitchEffect 0.15s steps(1) forwards;
 }
@@ -833,7 +833,7 @@ img { display: block; max-width: 100%; }
   100% { clip-path: inset(0 0 0 0); transform: translate(0, 0); }
 }
 
-/* ── Custom Cursor ───────────────────────────────────── */
+/* â”€â”€ Custom Cursor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 #cursor-ring {
   width: 36px;
   height: 36px;
@@ -860,7 +860,7 @@ img { display: block; max-width: 100%; }
   will-change: transform;
 }
 
-/* ── Profile Card Custom Animations ────────────────────── */
+/* â”€â”€ Profile Card Custom Animations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes profileGlitchFlicker {
   0%, 94%, 98%, 100% { filter: none; transform: none; }
   95% { filter: drop-shadow(2px 0 0 rgba(0,255,255,0.8)) drop-shadow(-2px 0 0 rgba(255,45,120,0.8)); transform: translate(1px, 1px); }
@@ -893,7 +893,7 @@ img { display: block; max-width: 100%; }
   animation: borderGradientShift 4s ease infinite;
 }
 
-/* ── Matrix Breach Global Glitch Effects ──────────────── */
+/* â”€â”€ Matrix Breach Global Glitch Effects â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 body.matrix-breach-active #hero,
 body.matrix-breach-active #projects,
 body.matrix-breach-active #skills,
@@ -929,7 +929,7 @@ body.matrix-breach-active a {
   55% { filter: invert(0); }
 }
 
-/* ── Global Gravity Fall ───────────────────────────── */
+/* â”€â”€ Global Gravity Fall â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes gravityCollapse {
   0% { transform: translateY(0) rotate(0); opacity: 1; }
   10% { transform: translateY(-4vh) rotate(1deg); animation-timing-function: ease-in; }
@@ -946,7 +946,7 @@ body.gravity-fall-active #root {
   transform-style: preserve-3d;
 }
 
-/* ── Admin Login Flow Animations ───────────────────────────── */
+/* â”€â”€ Admin Login Flow Animations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .terminal-window.input-active {
   animation: microJitter 0.04s ease-out;
 }
@@ -1035,4 +1035,84 @@ body.gravity-fall-active #root {
     100% 100%, 12px 100%, 0 calc(100% - 12px)
   );
   padding: 16px 18px;
+}
+
+/* â”€â”€ System Override Feature â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.system-override {
+  animation: overrideUnstable 3s infinite;
+  overflow: hidden;
+}
+
+@keyframes overrideUnstable {
+  0% { transform: translate(0) scale(1) skew(0deg); filter: hue-rotate(180deg) saturate(1.5) contrast(1.2); }
+  3% { transform: translate(-3px, 2px) scale(1.02) skew(1deg); filter: hue-rotate(160deg) saturate(2) contrast(1.5); }
+  6% { transform: translate(3px, -2px) scale(0.98) skew(-1deg); filter: hue-rotate(200deg) saturate(1.5) contrast(1.1); }
+  9% { transform: translate(-1px, 2px) scale(1) skew(0deg); filter: hue-rotate(180deg) saturate(1.5) contrast(1.2); }
+  45% { transform: translate(0) scale(1) skew(0deg); filter: hue-rotate(180deg) saturate(1.5) contrast(1.2); }
+  46% { transform: translate(4px, 0) scale(1.01) skew(3deg); filter: hue-rotate(120deg) saturate(3) contrast(2); }
+  48% { transform: translate(-4px, 0) scale(0.99) skew(-3deg); filter: hue-rotate(240deg) saturate(1.2) contrast(1); }
+  50% { transform: translate(0) scale(1) skew(0deg); filter: hue-rotate(180deg) saturate(1.5) contrast(1.2); }
+  85% { transform: translate(0) scale(1) skew(0deg); filter: hue-rotate(180deg) saturate(1.5) contrast(1.2); }
+  86% { transform: translate(0, 5px) scale(1) skew(0deg); filter: hue-rotate(180deg) saturate(1.5) contrast(1.2) invert(0.2); }
+  88% { transform: translate(0, -5px) scale(1) skew(0deg); filter: hue-rotate(180deg) saturate(1.5) contrast(1.2) invert(0.8); }
+  90% { transform: translate(0) scale(1) skew(0deg); filter: hue-rotate(180deg) saturate(1.5) contrast(1.2); }
+  100% { transform: translate(0) scale(1) skew(0deg); filter: hue-rotate(180deg) saturate(1.5) contrast(1.2); }
+}
+
+.glitch-text-fast {
+  position: relative;
+  display: inline-block;
+  animation: glitchAnimFast 2s infinite linear alternate-reverse;
+}
+
+.glitch-text-fast::before,
+.glitch-text-fast::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.glitch-text-fast::before {
+  left: 2px;
+  text-shadow: -2px 0 red;
+  clip-path: inset(20% 0 80% 0);
+  animation: glitchAnimFastBefore 1.5s infinite linear alternate-reverse;
+}
+
+.glitch-text-fast::after {
+  left: -2px;
+  text-shadow: -2px 0 blue;
+  clip-path: inset(80% 0 20% 0);
+  animation: glitchAnimFastAfter 1s infinite linear alternate-reverse;
+}
+
+@keyframes glitchAnimFast {
+  0% { transform: skew(0deg); opacity: 1; }
+  10% { transform: skew(-5deg); opacity: 0.8; }
+  20% { transform: skew(5deg); opacity: 1; }
+  30% { transform: skew(-2deg); opacity: 0.9; }
+  40% { transform: skew(2deg); opacity: 1; }
+  100% { transform: skew(0deg); opacity: 1; }
+}
+
+@keyframes glitchAnimFastBefore {
+  0% { clip-path: inset(20% 0 80% 0); transform: translate(2px, 0); }
+  20% { clip-path: inset(60% 0 10% 0); transform: translate(-2px, 0); }
+  40% { clip-path: inset(40% 0 50% 0); transform: translate(4px, 0); }
+  60% { clip-path: inset(80% 0 5% 0); transform: translate(-2px, 0); }
+  80% { clip-path: inset(10% 0 70% 0); transform: translate(2px, 0); }
+  100% { clip-path: inset(30% 0 60% 0); transform: translate(-4px, 0); }
+}
+
+@keyframes glitchAnimFastAfter {
+  0% { clip-path: inset(80% 0 20% 0); transform: translate(-2px, 0); }
+  20% { clip-path: inset(10% 0 60% 0); transform: translate(2px, 0); }
+  40% { clip-path: inset(50% 0 40% 0); transform: translate(-4px, 0); }
+  60% { clip-path: inset(5% 0 80% 0); transform: translate(2px, 0); }
+  80% { clip-path: inset(70% 0 10% 0); transform: translate(-2px, 0); }
+  100% { clip-path: inset(60% 0 30% 0); transform: translate(4px, 0); }
 }
