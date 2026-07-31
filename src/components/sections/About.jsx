@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
@@ -84,55 +85,80 @@ function getInitialPosition() {
   };
 }
 
-function MatrixRainOverlay({ seed }) {
-  const chars = '01ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%&*+-<>/';
-  const columns = Array.from({ length: 20 }, (_, columnIndex) => {
-    const length = 11 + ((seed + columnIndex * 3) % 14);
-    const delay = ((seed + columnIndex) % 10) * 0.12;
-    const duration = 1.7 + ((seed + columnIndex) % 6) * 0.22;
-    const glyphs = Array.from({ length }, (_, rowIndex) => {
-      const charIndex = (seed + columnIndex * 11 + rowIndex * 7) % chars.length;
-      return chars[charIndex];
-    });
+function GlobalMatrixOverlay({ isExiting }) {
+  const canvasRef = useRef(null);
 
-    return {
-      id: columnIndex,
-      delay,
-      duration,
-      glyphs,
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    const fontSize = Math.max(14, Math.floor(width / 80));
+    const columns = Math.floor(width / fontSize);
+    const drops = new Array(columns).fill(0).map(() => Math.random() * -100);
+
+    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ';
+    
+    let animationFrameId;
+    let lastTime = 0;
+    const fps = 35;
+    const interval = 1000 / fps;
+
+    const draw = (currentTime) => {
+      animationFrameId = requestAnimationFrame(draw);
+      
+      if (currentTime - lastTime < interval) return;
+      lastTime = currentTime;
+
+      ctx.fillStyle = 'rgba(1, 3, 8, 0.15)';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.font = `${fontSize}px "JetBrains Mono", monospace`;
+      
+      for (let i = 0; i < drops.length; i++) {
+        ctx.fillStyle = Math.random() > 0.95 ? '#FF2D78' : '#00FFFF';
+        
+        const text = chars.charAt(Math.floor(Math.random() * chars.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
     };
-  });
 
-  return (
-    <div className="terminal-matrix-overlay absolute inset-0 z-30 overflow-hidden pointer-events-none">
-      {columns.map((column) => (
-        <div
-          key={column.id}
-          className="terminal-matrix-column"
-          style={{
-            left: `${(column.id / columns.length) * 100}%`,
-            animationDuration: `${column.duration}s`,
-            animationDelay: `${column.delay}s`,
-          }}
-        >
-          {column.glyphs.map((glyph, glyphIndex) => (
-            <span
-              key={`${column.id}-${glyphIndex}`}
-              className="terminal-matrix-char"
-              style={{
-                opacity: 0.08 + ((glyphIndex + column.id) % 6) * 0.05,
-              }}
-            >
-              {glyph}
-            </span>
-          ))}
-        </div>
-      ))}
-    </div>
+    animationFrameId = requestAnimationFrame(draw);
+
+    const handleResize = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  return createPortal(
+    <canvas
+      ref={canvasRef}
+      className={`fixed inset-0 z-[9998] pointer-events-none transition-opacity duration-500 ${isExiting ? 'opacity-0' : 'opacity-75'}`}
+    />,
+    document.body
   );
 }
 
-function TerminalWindow({ isOpen, onClose }) {
+function TerminalWindow({ isOpen, onClose, onLaunchGame, systemMessage, clearSystemMessage }) {
   const [history, setHistory] = useState([makeBootEntry()]);
   const [input, setInput] = useState('');
   const [commandHistory, setCommandHistory] = useState([]);
@@ -149,6 +175,7 @@ function TerminalWindow({ isOpen, onClose }) {
   const windowRef = useRef(null);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
   const timersRef = useRef([]);
+  const matrixLastTriggered = useRef(0);
 
   const clearTrackedTimers = () => {
     timersRef.current.forEach((timer) => {
@@ -170,6 +197,19 @@ function TerminalWindow({ isOpen, onClose }) {
   const updateHistory = (entryId, updater) => {
     setHistory((prev) => prev.map((entry) => (entry.id === entryId ? updater(entry) : entry)));
   };
+
+  useEffect(() => {
+    if (systemMessage && isOpen) {
+      appendHistory({
+        id: makeId('system'),
+        kind: 'success',
+        text: systemMessage
+      });
+      if (clearSystemMessage) {
+        clearSystemMessage();
+      }
+    }
+  }, [systemMessage, isOpen, clearSystemMessage]);
 
   useEffect(() => () => clearTrackedTimers(), []);
 
@@ -389,14 +429,73 @@ function TerminalWindow({ isOpen, onClose }) {
     setInput('');
     setIsBusy(true);
 
+    if (trimmed === 'super' || trimmed === 'secrets') {
+      appendHistory({
+        id: makeId('system'),
+        kind: 'system',
+        text: `CLASSIFIED COMMANDS DIRECTORY:
+- play / rocket  : Launch ROCKET_RAID.EXE
+- manifesto      : Print personal manifesto
+- matrix         : Initiate system breach
+- sudo hack      : Try to bypass security
+- whoami --deep  : Perform deep identity scan
+- sl             : 🚂
+- konami         : Enter cheat code
+- tweak <module> : Modules: neon, glitch, bass, coffee, gravity, empathy`
+      });
+      setIsBusy(false);
+      return;
+    }
+
+    if (trimmed === 'manifesto' || trimmed === 'about' || trimmed === 'bio') {
+      appendHistory({
+        id: makeId('system'),
+        kind: 'success',
+        text: `"Too blessed to be stressed that's my manifesto"`
+      });
+      setIsBusy(false);
+      return;
+    }
+
     if (trimmed === 'matrix') {
-      setMatrixSeed((prev) => prev + 1);
+      const now = Date.now();
+      if (now - matrixLastTriggered.current < 5000) {
+        appendHistory({ id: makeId('cmd'), kind: 'error', text: 'SYSTEM COOLING DOWN...' });
+        setIsBusy(false);
+        return;
+      }
+      
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) {
+        appendHistory({ id: makeId('cmd'), kind: 'output', text: 'INITIATING SYSTEM BREACH...' });
+        trackTimer(
+          window.setTimeout(() => {
+            appendHistory({ id: makeId('cmd'), kind: 'output', text: 'BREACH CONTAINED. SYSTEM RESTORED.' });
+            setIsBusy(false);
+          }, 1500)
+        );
+        return;
+      }
+
+      matrixLastTriggered.current = now;
+      appendHistory({ id: makeId('cmd'), kind: 'output', text: 'INITIATING SYSTEM BREACH...' });
+      
+      document.body.classList.add('matrix-breach-active');
       setMatrixActive(true);
+      
       trackTimer(
         window.setTimeout(() => {
-          setMatrixActive(false);
-          setIsBusy(false);
-        }, 3000)
+          document.body.classList.remove('matrix-breach-active');
+          setMatrixActive('exiting');
+          
+          trackTimer(
+            window.setTimeout(() => {
+              setMatrixActive(false);
+              appendHistory({ id: makeId('cmd'), kind: 'output', text: 'BREACH CONTAINED. SYSTEM RESTORED.' });
+              setIsBusy(false);
+            }, 500)
+          );
+        }, 3500)
       );
       return;
     }
@@ -520,6 +619,13 @@ function TerminalWindow({ isOpen, onClose }) {
           shake: tweak.kind === 'error',
           glitch: tweak.kind === 'error',
         });
+        
+        if (tweak.effect === 'gravity') {
+          document.body.classList.add('gravity-fall-active');
+          window.setTimeout(() => {
+            document.body.classList.remove('gravity-fall-active');
+          }, 4000);
+        }
       } else {
         appendHistory({
           id: makeId('error'),
@@ -548,6 +654,24 @@ function TerminalWindow({ isOpen, onClose }) {
         text: `cat: ${trimmed.replace('cat ', '').trim()}: No such file or directory`,
       });
       setIsBusy(false);
+      return;
+    }
+
+    if (trimmed === 'play' || trimmed === 'rocket' || trimmed === './rocket.exe') {
+      appendHistory({
+        id: makeId('system'),
+        kind: 'system',
+        text: 'INITIALIZING ROCKET_RAID.EXE...',
+      });
+      trackTimer(
+        window.setTimeout(() => {
+          setIsBusy(false);
+          onClose();
+          setTimeout(() => {
+            if (onLaunchGame) onLaunchGame();
+          }, 300);
+        }, 800)
+      );
       return;
     }
 
@@ -643,7 +767,7 @@ function TerminalWindow({ isOpen, onClose }) {
             ref={scrollRef}
             className="relative max-h-[68vh] overflow-y-auto p-4 font-jetbrains text-sm md:text-[15px] leading-relaxed z-20 scrollbar-hide"
           >
-            {matrixActive && <MatrixRainOverlay seed={matrixSeed} />}
+            {matrixActive && <GlobalMatrixOverlay isExiting={matrixActive === 'exiting'} />}
 
             <div className="relative z-20 space-y-3">
               {history.map((item) => (
@@ -704,7 +828,11 @@ function TerminalDock({ onOpen }) {
 
 function ProfileCard() {
   const containerRef = useRef(null);
+  const cardInnerRef = useRef(null);
+  const hexRingRef = useRef(null);
   const avatarSweepRef = useRef(null);
+  const nameRef1 = useRef(null);
+  const nameRef2 = useRef(null);
   const [avatarReady, setAvatarReady] = useState(false);
 
   useEffect(() => {
@@ -716,52 +844,105 @@ function ProfileCard() {
 
     const st = ScrollTrigger.create({
       trigger: containerRef.current,
-      start: 'top 78%',
+      start: 'top 85%',
       once: true,
       onEnter: () => {
         setAvatarReady(true);
+        
+        const tl = gsap.timeline();
+        
+        // Card entrance
+        tl.fromTo(containerRef.current, 
+          { y: 20, opacity: 0 }, 
+          { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }
+        );
+
+        // Hexagon glow
+        tl.fromTo(hexRingRef.current,
+          { filter: 'brightness(0.3)' },
+          { filter: 'brightness(1)', duration: 0.8, ease: 'power2.out' },
+          "-=0.4"
+        );
+
+        // Scanline
         if (avatarSweepRef.current) {
-          gsap.fromTo(
+          tl.fromTo(
             avatarSweepRef.current,
-            { yPercent: -120, opacity: 0 },
-            { yPercent: 120, opacity: 0, duration: 1.8, ease: 'power2.out' }
+            { yPercent: -120, opacity: 0.6 },
+            { yPercent: 120, opacity: 0, duration: 1.5, ease: 'power2.out' },
+            "-=0.6"
           );
         }
+
+        // Glitch decode for name
+        const decodeText = (element, originalText) => {
+          if (!element) return;
+          const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
+          let iteration = 0;
+          const interval = setInterval(() => {
+            element.innerText = originalText.split("").map((letter, index) => {
+              if (index < iteration) {
+                return originalText[index];
+              }
+              return chars[Math.floor(Math.random() * chars.length)];
+            }).join("");
+            if (iteration >= originalText.length) {
+              clearInterval(interval);
+            }
+            iteration += 1 / 3;
+          }, 30);
+        };
+
+        decodeText(nameRef1.current, "SOORAJ");
+        decodeText(nameRef2.current, "CHAKRAVARTHY S");
       },
     });
 
     return () => st.kill();
   }, []);
 
+  const handleHexHover = () => {
+    if (avatarSweepRef.current) {
+      gsap.fromTo(
+        avatarSweepRef.current,
+        { yPercent: -120, opacity: 0.5 },
+        { yPercent: 120, opacity: 0, duration: 1.2, ease: 'power2.out', overwrite: true }
+      );
+    }
+  };
+
   return (
-    <div ref={containerRef} className="relative w-full max-w-[380px] mx-auto p-[1px]" style={{ background: 'linear-gradient(135deg, rgba(0,255,255,0.7), rgba(255,45,120,0.68))' }}>
-      <div className="profile-id-card relative w-full min-h-[460px] overflow-hidden bg-[#03080e] p-8 md:p-9">
+    <div ref={containerRef} className="group relative w-full max-w-[380px] mx-auto p-[1px] rounded-sm transition-transform duration-300 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(0,255,255,0.4)] animate-border-gradient opacity-0">
+      <div ref={cardInnerRef} className="profile-id-card relative w-full h-auto overflow-hidden bg-[#03080e] p-8 md:p-9">
         <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top,_rgba(0,255,255,0.14),_transparent_34%),radial-gradient(circle_at_bottom,_rgba(255,45,120,0.08),_transparent_28%)]" />
         <div className="absolute inset-0 pointer-events-none opacity-20 bg-[linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:40px_40px]" />
 
-        <div className="relative z-10 flex min-h-[inherit] flex-col items-center justify-between gap-6 text-center">
-          <div className="w-full flex flex-col items-center gap-5 pt-1">
-            <div className="relative">
-              <div className="profile-id-avatar-ring relative flex h-32 w-32 items-center justify-center hex-clip bg-[#010308]/90 p-[3px] md:h-36 md:w-36">
+        <div className="relative z-10 flex h-full flex-col items-center justify-center gap-4 text-center">
+          <div className="w-full flex flex-col items-center gap-3 pt-1">
+            <div className="relative hex-breathing-ring group/hex">
+              <div 
+                ref={hexRingRef}
+                onMouseEnter={handleHexHover}
+                className="profile-id-avatar-ring relative flex h-36 w-36 items-center justify-center hex-clip bg-neon-cyan/40 p-[3px] md:h-40 md:w-40 group-hover/hex:brightness-125 transition-all duration-300 cursor-crosshair"
+              >
                 <div className="profile-id-avatar hex-clip relative flex h-full w-full items-center justify-center overflow-hidden">
-                  <svg viewBox="0 0 100 100" className={`h-16 w-16 text-neon-cyan ${avatarReady ? 'opacity-100' : 'opacity-70'}`} aria-hidden="true">
-                    <path fill="currentColor" d="M50 11a18 18 0 1 0 0 36 18 18 0 0 0 0-36Zm0 42c-17.6 0-32 12.9-32 28.8V88h64v-6.2C82 65.9 67.6 53 50 53Z" />
-                  </svg>
+                  <div className="absolute inset-0 z-10 bg-neon-cyan/20 mix-blend-soft-light pointer-events-none" />
+                  <img src="/profile.png" alt="Sooraj Chakravarthy S" className={`h-full w-full object-cover object-top transition-opacity duration-700 profile-glitch-fx filter brightness-105 contrast-110 saturate-50 ${avatarReady ? 'opacity-100' : 'opacity-0'}`}/>
                   <div
                     ref={avatarSweepRef}
-                    className={`absolute inset-0 bg-[linear-gradient(to_bottom,transparent,rgba(255,255,255,0.14),transparent)] ${avatarReady ? 'profile-id-sweep' : 'opacity-0'}`}
+                    className={`absolute inset-0 z-20 bg-[linear-gradient(to_bottom,transparent,rgba(0,255,255,0.4),transparent)] pointer-events-none ${avatarReady ? 'profile-id-sweep' : 'opacity-0'}`}
                   />
                 </div>
               </div>
-              <div className="absolute -top-2 -right-6 text-neon-cyan/80 font-jetbrains text-xs tracking-[0.3em]">
-                [ ]
+              <div className="absolute -top-4 -right-4 z-30 text-neon-cyan font-jetbrains text-xs tracking-[0.2em] bg-[#001f1f]/80 backdrop-blur-sm px-2 py-0.5 border border-neon-cyan/40 rounded-sm">
+                [ ONLINE ]
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-1.5 mt-2">
               <h3 className="profile-id-gradient-text font-orbitron font-bold uppercase tracking-[0.14em] leading-[0.95] text-[clamp(1rem,3vw,1.2rem)]">
-                <span className="block whitespace-nowrap">SOORAJ</span>
-                <span className="block whitespace-nowrap">CHAKRAVARTHY S</span>
+                <span ref={nameRef1} className="block whitespace-nowrap">SOORAJ</span>
+                <span ref={nameRef2} className="block whitespace-nowrap">CHAKRAVARTHY S</span>
               </h3>
               <div className="font-jetbrains text-[10px] md:text-[11px] uppercase tracking-[0.26em] text-text-dim leading-relaxed max-w-[28ch] mx-auto">
                 M S RAMAIAH UNIVERSITY OF APPLIED SCIENCES
@@ -770,17 +951,18 @@ function ProfileCard() {
           </div>
 
           <div className="w-full pt-1 pb-1">
-            <div className="profile-id-badge mx-auto inline-flex max-w-full items-center justify-center rounded-full border border-neon-pink/25 bg-[#050c14]/80 px-5 py-2.5 font-jetbrains text-[9px] md:text-[10px] uppercase text-neon-pink leading-snug">
-              [ B.TECH AI &amp; ML | 2025 - PRESENT ]
+            <div className="profile-id-badge mx-auto inline-flex max-w-full items-center justify-center rounded-full border border-neon-pink/25 bg-[#050c14]/80 px-6 py-2.5 font-jetbrains text-[8.5px] md:text-[9.5px] uppercase text-neon-pink leading-snug">
+              [ B.TECH AI &amp; ML | 2025 - <span className="whitespace-nowrap ml-1">PRESENT ]</span>
             </div>
           </div>
         </div>
+        <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_60px_rgba(1,3,8,0.9)] z-20" />
       </div>
     </div>
   );
 }
 
-export default function About({ terminalOpen, onOpenTerminal, onCloseTerminal }) {
+export default function About({ terminalOpen, onOpenTerminal, onCloseTerminal, onLaunchGame, systemMessage, clearSystemMessage }) {
   const ref = useScrollReveal({ y: 30 });
 
   return (
@@ -804,7 +986,13 @@ export default function About({ terminalOpen, onOpenTerminal, onCloseTerminal })
         </div>
       </div>
 
-      <TerminalWindow isOpen={terminalOpen} onClose={onCloseTerminal} />
+      <TerminalWindow 
+        isOpen={terminalOpen} 
+        onClose={onCloseTerminal} 
+        onLaunchGame={onLaunchGame} 
+        systemMessage={systemMessage}
+        clearSystemMessage={clearSystemMessage}
+      />
     </section>
   );
 }

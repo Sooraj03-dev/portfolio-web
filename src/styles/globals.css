@@ -390,31 +390,6 @@ img { display: block; max-width: 100%; }
   animation: terminalTrain 2.8s linear 1;
 }
 
-.terminal-matrix-overlay {
-  background:
-    radial-gradient(circle at center, rgba(0,255,0,0.05), transparent 55%),
-    rgba(1, 3, 8, 0.84);
-}
-
-.terminal-matrix-column {
-  position: absolute;
-  top: -30%;
-  bottom: -30%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  font-size: 11px;
-  line-height: 1.1;
-  color: rgba(124, 255, 182, 0.95);
-  text-shadow: 0 0 8px rgba(124, 255, 182, 0.18);
-  animation: terminalMatrixFall linear infinite;
-}
-
-.terminal-matrix-char {
-  opacity: 0.18;
-}
-
 .terminal-tweak-card {
   position: relative;
   overflow: hidden;
@@ -671,52 +646,6 @@ img { display: block; max-width: 100%; }
     transform: translateY(-120%);
     opacity: 0;
   }
-
-  @keyframes tweakSweep {
-    0% { transform: translateX(-120%); }
-    100% { transform: translateX(120%); }
-  }
-
-  @keyframes tweakPulse {
-    0%, 100% { transform: scaleY(0.55); opacity: 0.7; }
-    50% { transform: scaleY(1.08); opacity: 1; }
-  }
-
-  @keyframes tweakGlitch {
-    0%, 100% { clip-path: inset(0 0 0 0); }
-    20% { clip-path: inset(25% 0 45% 0); }
-    40% { clip-path: inset(55% 0 18% 0); }
-    60% { clip-path: inset(12% 0 60% 0); }
-    80% { clip-path: inset(0 0 28% 0); }
-  }
-
-  @keyframes tweakEq {
-    0%, 100% { transform: scaleY(0.45); }
-    35% { transform: scaleY(1); }
-    70% { transform: scaleY(0.7); }
-  }
-
-  @keyframes tweakCoffee {
-    0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
-    50% { transform: translateY(-4px) rotate(-4deg); opacity: 1; }
-  }
-
-  @keyframes tweakOrbit {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  @keyframes tweakFloat {
-    0%, 100% { transform: translate(-50%, -50%) translateY(0); }
-    50% { transform: translate(-50%, -50%) translateY(-5px); }
-  }
-
-  @keyframes tweakHeartbeat {
-    0%, 100% { transform: scale(1); }
-    25% { transform: scale(1.08); }
-    50% { transform: scale(0.96); }
-    75% { transform: scale(1.12); }
-  }
   12% {
     opacity: 0.65;
   }
@@ -727,6 +656,56 @@ img { display: block; max-width: 100%; }
     transform: translateY(120%);
     opacity: 0;
   }
+}
+
+@keyframes tweakSweep {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+
+@keyframes tweakPulse {
+  0%, 100% { transform: scaleY(0.55); opacity: 0.7; filter: hue-rotate(0deg); }
+  50% { transform: scaleY(1.3); opacity: 1; filter: hue-rotate(90deg); box-shadow: 0 0 20px rgba(0,255,255,0.8); }
+}
+
+@keyframes tweakGlitch {
+  0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); filter: hue-rotate(0deg); }
+  20% { clip-path: inset(25% 0 45% 0); transform: translate(-4px, 2px); filter: hue-rotate(45deg); }
+  40% { clip-path: inset(55% 0 18% 0); transform: translate(4px, -2px); filter: hue-rotate(90deg); }
+  60% { clip-path: inset(12% 0 60% 0); transform: translate(-2px, -4px); filter: hue-rotate(135deg); }
+  80% { clip-path: inset(0 0 28% 0); transform: translate(2px, 4px); filter: hue-rotate(180deg); }
+}
+
+@keyframes tweakEq {
+  0%, 100% { transform: scaleY(0.45); filter: hue-rotate(0deg); }
+  25% { transform: scaleY(1.2); filter: hue-rotate(45deg); }
+  50% { transform: scaleY(0.2); filter: hue-rotate(90deg); }
+  75% { transform: scaleY(1.4); filter: hue-rotate(135deg); }
+}
+
+@keyframes tweakCoffee {
+  0%, 100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.8; }
+  25% { transform: translateY(-6px) scale(1.2) rotate(-8deg); opacity: 1; color: #00FFFF; }
+  75% { transform: translateY(-3px) scale(1.1) rotate(8deg); opacity: 0.9; }
+}
+
+@keyframes tweakOrbit {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); box-shadow: 0 0 30px rgba(0,255,255,0.4); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes tweakFloat {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); background: radial-gradient(circle, #00FFFF, #FF2D78); }
+  50% { transform: translate(-50%, -60%) scale(1.3); background: radial-gradient(circle, #FF2D78, #00FFFF); box-shadow: 0 0 25px rgba(255,45,120,0.8); }
+}
+
+@keyframes tweakHeartbeat {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0px #FF5E8A); }
+  15% { transform: scale(1.3); filter: drop-shadow(0 0 10px #FF5E8A); }
+  30% { transform: scale(0.9); filter: drop-shadow(0 0 2px #FF5E8A); }
+  45% { transform: scale(1.4); filter: drop-shadow(0 0 15px #FF5E8A); }
+  60% { transform: scale(0.95); filter: drop-shadow(0 0 5px #FF5E8A); }
 }
 
 @keyframes terminalBorderPulse {
@@ -811,10 +790,7 @@ img { display: block; max-width: 100%; }
   100% { transform: translateX(110%); }
 }
 
-@keyframes terminalMatrixFall {
-  0% { transform: translateY(-15%); }
-  100% { transform: translateY(15%); }
-}
+
 
 /* ── CRT Scanlines overlay ───────────────────────────── */
 .scanlines {
@@ -882,4 +858,90 @@ img { display: block; max-width: 100%; }
   pointer-events: none;
   z-index: 9999;
   will-change: transform;
+}
+
+/* ── Profile Card Custom Animations ────────────────────── */
+@keyframes profileGlitchFlicker {
+  0%, 94%, 98%, 100% { filter: none; transform: none; }
+  95% { filter: drop-shadow(2px 0 0 rgba(0,255,255,0.8)) drop-shadow(-2px 0 0 rgba(255,45,120,0.8)); transform: translate(1px, 1px); }
+  96% { filter: drop-shadow(-2px 0 0 rgba(0,255,255,0.8)) drop-shadow(2px 0 0 rgba(255,45,120,0.8)); transform: translate(-1px, -1px); }
+  97% { filter: none; transform: translate(1px, 0); }
+}
+
+.profile-glitch-fx {
+  animation: profileGlitchFlicker 5s infinite;
+}
+
+@keyframes hexPulse {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(0,255,255,0.6)); }
+  50% { filter: drop-shadow(0 0 16px rgba(0,255,255,1)); }
+}
+
+.hex-breathing-ring {
+  animation: hexPulse 3s ease-in-out infinite;
+}
+
+@keyframes borderGradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-border-gradient {
+  background: linear-gradient(135deg, rgba(0,255,255,0.8), rgba(255,45,120,0.8), rgba(0,255,255,0.8));
+  background-size: 200% 200%;
+  animation: borderGradientShift 4s ease infinite;
+}
+
+/* ── Matrix Breach Global Glitch Effects ──────────────── */
+body.matrix-breach-active #hero,
+body.matrix-breach-active #projects,
+body.matrix-breach-active #skills,
+body.matrix-breach-active #contact,
+body.matrix-breach-active #about > .max-w-6xl,
+body.matrix-breach-active nav {
+  animation: breachShake 0.4s infinite;
+}
+
+body.matrix-breach-active h1,
+body.matrix-breach-active h2,
+body.matrix-breach-active a {
+  animation: breachTextFlicker 2s infinite;
+}
+
+@keyframes breachShake {
+  0%, 100% { transform: translate(0, 0) skew(0); filter: none; }
+  10% { transform: translate(-2px, 1px) skewX(2deg); filter: drop-shadow(3px 0 0 #00FFFF) drop-shadow(-3px 0 0 #FF2D78); }
+  20% { transform: translate(2px, -1px) skew(0); filter: none; }
+  30% { transform: translate(-1px, 2px) skewX(-2deg); filter: drop-shadow(-3px 0 0 #00FFFF) drop-shadow(3px 0 0 #FF2D78); }
+  40% { transform: translate(1px, -2px) skew(0); filter: none; }
+  80% { transform: translate(0, 0) skew(0); filter: none; }
+  85% { transform: translate(2px, 1px) skewX(1deg); filter: drop-shadow(2px 2px 0 #00FFFF); }
+  90% { transform: translate(-2px, -1px) skew(0); filter: none; }
+}
+
+@keyframes breachTextFlicker {
+  0%, 100% { filter: invert(0); }
+  5% { filter: invert(1) hue-rotate(180deg); }
+  10% { filter: invert(0); }
+  45% { filter: invert(0); }
+  50% { filter: invert(1) hue-rotate(180deg); }
+  55% { filter: invert(0); }
+}
+
+/* ── Global Gravity Fall ───────────────────────────── */
+@keyframes gravityCollapse {
+  0% { transform: translateY(0) rotate(0); opacity: 1; }
+  10% { transform: translateY(-4vh) rotate(1deg); animation-timing-function: ease-in; }
+  45% { transform: translateY(120vh) rotate(-3deg); opacity: 1; }
+  46% { transform: translateY(120vh); opacity: 0; }
+  60% { transform: translateY(-50vh); opacity: 0; animation-timing-function: ease-out; }
+  85% { transform: translateY(4vh); opacity: 1; }
+  92% { transform: translateY(-1vh); }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+body.gravity-fall-active #root {
+  animation: gravityCollapse 4s forwards;
+  transform-style: preserve-3d;
 }
