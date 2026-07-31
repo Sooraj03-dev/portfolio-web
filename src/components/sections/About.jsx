@@ -1014,7 +1014,7 @@ function TerminalWindow({ isOpen, onClose, onLaunchGame, systemMessage, clearSys
       appendHistory({ id: spinnerId, kind: 'sync_spinner' });
 
       import('../../lib/supabase').then(async ({ supabase }) => {
-        const { data, error } = await supabase.from('projects').delete().ilike('title', trimmed.trim()).select();
+        const { data, error } = await supabase.from('projects').delete().eq('title', trimmed.trim()).select();
         
         if (error) {
           updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> DELETE FAILED: ' + error.message }));
@@ -1039,7 +1039,7 @@ function TerminalWindow({ isOpen, onClose, onLaunchGame, systemMessage, clearSys
       appendHistory({ id: spinnerId, kind: 'sync_spinner' });
 
       import('../../lib/supabase').then(async ({ supabase }) => {
-        const { data, error } = await supabase.from('skills').delete().ilike('name', trimmed.trim()).select();
+        const { data, error } = await supabase.from('skills').delete().eq('name', trimmed.trim()).select();
         if (error) {
           updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> DELETE FAILED: ' + error.message }));
         } else if (!data || data.length === 0) {
@@ -1063,7 +1063,7 @@ function TerminalWindow({ isOpen, onClose, onLaunchGame, systemMessage, clearSys
       appendHistory({ id: spinnerId, kind: 'sync_spinner' });
 
       import('../../lib/supabase').then(async ({ supabase }) => {
-        const { data, error } = await supabase.from('timeline').delete().ilike('title', trimmed.trim()).select();
+        const { data, error } = await supabase.from('timeline').delete().eq('title', trimmed.trim()).select();
         if (error) {
           updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> DELETE FAILED: ' + error.message }));
         } else if (!data || data.length === 0) {
@@ -1087,7 +1087,7 @@ function TerminalWindow({ isOpen, onClose, onLaunchGame, systemMessage, clearSys
       appendHistory({ id: spinnerId, kind: 'sync_spinner' });
 
       import('../../lib/supabase').then(async ({ supabase }) => {
-        const { data, error } = await supabase.from('skills').delete().ilike('category', trimmed.trim()).select();
+        const { data, error } = await supabase.from('skills').delete().eq('category', trimmed.trim()).select();
         if (error) {
           updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> DELETE FAILED: ' + error.message }));
         } else if (!data || data.length === 0) {
@@ -1137,7 +1137,7 @@ function TerminalWindow({ isOpen, onClose, onLaunchGame, systemMessage, clearSys
             return;
           }
 
-          const { data, error } = await supabase.from('skills').update(updatePayload).ilike('name', finalData.originalName.trim()).select();
+          const { data, error } = await supabase.from('skills').update(updatePayload).eq('name', finalData.originalName.trim()).select();
           
           if (error) {
             updateHistory(spinnerId, (entry) => ({ ...entry, kind: 'error', text: '> UPDATE FAILED: ' + error.message }));

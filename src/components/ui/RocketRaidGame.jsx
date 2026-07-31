@@ -19,7 +19,7 @@ export default function RocketRaidGame({ onExit }) {
   const stateRef = useRef({
     width: 0,
     height: 0,
-    player: { x: 0, y: 0, width: 24, height: 32, vx: 0, vy: 0, speed: 0.4, drag: 0.85, lives: 3, invulnTimer: 0, lastFire: 0 },
+    player: { x: 0, y: 0, width: 24, height: 32, vx: 0, vy: 0, speed: 0.7, drag: 0.88, lives: 3, invulnTimer: 0, lastFire: 0 },
     projectiles: [],
     enemies: [],
     particles: [],
