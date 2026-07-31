@@ -1,0 +1,21 @@
+/* Cyberpunk specific animations and effects */
+.glitch-anim {
+  animation: glitchEffect 0.15s steps(1) forwards;
+}
+
+@keyframes glitchEffect {
+  0%   { clip-path: inset(0 0 95% 0); transform: translate(-3px, 0); }
+  25%  { clip-path: inset(40% 0 45% 0); transform: translate(3px, 0); }
+  50%  { clip-path: inset(70% 0 10% 0); transform: translate(-2px, 0); }
+  75%  { clip-path: inset(15% 0 70% 0); transform: translate(2px, 0); }
+  100% { clip-path: inset(0 0 0 0); transform: translate(0, 0); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; box-shadow: 0 0 10px currentColor; }
+  50% { opacity: 0.5; box-shadow: 0 0 20px currentColor, 0 0 40px currentColor; }
+}
