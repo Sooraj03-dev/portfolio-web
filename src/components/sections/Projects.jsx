@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { projects } from '../../data/projects';
+import { supabase } from '../../lib/supabase';
+import { projects as mockProjects } from '../../data/projects';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -45,6 +46,32 @@ function ScrambleTitle({ text, isStarted }) {
 export default function Projects() {
   const sectionRef = useRef(null);
   const [titlesStarted, setTitlesStarted] = useState(false);
+  const [pulseActive, setPulseActive] = useState(false);
+  const [dbProjects, setDbProjects] = useState(mockProjects);
+
+  const fetchProjects = async () => {
+    try {
+      const { data, error } = await supabase.from('projects').select('*').order('id', { ascending: true });
+      if (error) {
+        setDbProjects(mockProjects);
+      } else {
+        setDbProjects(data);
+      }
+    } catch {
+      setDbProjects(mockProjects);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
+    const handlePulse = () => {
+      setPulseActive(true);
+      fetchProjects();
+      setTimeout(() => setPulseActive(false), 800);
+    };
+    window.addEventListener('github-sync-pulse', handlePulse);
+    return () => window.removeEventListener('github-sync-pulse', handlePulse);
+  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -120,7 +147,7 @@ export default function Projects() {
       if (tl.scrollTrigger) tl.scrollTrigger.kill();
       tl.kill();
     };
-  }, []);
+  }, [dbProjects.length]);
 
   const getStatusDisplay = (status) => {
     switch (status) {
@@ -150,14 +177,14 @@ export default function Projects() {
   return (
     <section id="projects" ref={sectionRef} className="relative py-24 px-6 md:px-12" style={{ background: '#010308' }}>
       <div className="max-w-6xl mx-auto relative z-10">
-        <h2 className="font-orbitron text-3xl md:text-4xl font-bold uppercase tracking-cyber mb-4 neon-text-cyan text-center">
+        <h2 className="font-orbitron text-xl sm:text-3xl md:text-4xl font-bold uppercase tracking-cyber mb-4 neon-text-cyan text-center break-all sm:break-normal">
           SYSTEM_ARCHIVES
         </h2>
         <div className="w-24 h-px mx-auto mb-16" style={{ background: 'linear-gradient(to right, transparent, #00FFFF, transparent)' }} />
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
-            <div key={project.title} className="project-card-wrapper notch-card-tr relative group clickable overflow-hidden flex flex-col" style={{ background: 'rgba(5, 12, 20, 0.7)', border: '1px solid rgba(0,255,255,0.05)', transition: 'background 0.3s ease' }}>
+          {dbProjects.map((project) => (
+            <div key={project.title} className={`project-card-wrapper notch-card-tr relative group clickable overflow-hidden flex flex-col ${pulseActive ? 'telemetry-sync-pulse' : ''}`} style={{ background: 'rgba(5, 12, 20, 0.7)', border: '1px solid rgba(0,255,255,0.05)', transition: 'background 0.3s ease' }}>
               <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" preserveAspectRatio="none">
                 <rect className="project-border" x="0" y="0" width="100%" height="100%" fill="none" stroke="#00FFFF" strokeWidth="2" strokeDasharray="1500" strokeDashoffset="1500" />
               </svg>

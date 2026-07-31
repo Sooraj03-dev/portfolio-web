@@ -53,7 +53,8 @@ function ScrambleChar({ char, delay, isStarted, onComplete }) {
 
 export default function HeroName({ isStarted, onComplete }) {
   const line1 = "SOORAJ";
-  const line2 = "CHAKRAVARTHY";
+  const line2 = "CHAKRAVARTHY S";
+  
   const totalChars = line1.length + line2.length;
   const completedCount = useRef(0);
   
@@ -104,12 +105,12 @@ export default function HeroName({ isStarted, onComplete }) {
       <h1 
         className="font-orbitron font-black uppercase m-0 flex flex-col leading-[0.9]"
         style={{
-          fontSize: 'clamp(36px, 6vw, 80px)',
+          fontSize: 'clamp(22px, 7vw, 80px)',
           color: 'transparent',
           backgroundClip: 'text',
           WebkitBackgroundClip: 'text',
           backgroundImage: 'linear-gradient(135deg, #00FFFF 0%, #AAFFEE 30%, #00DDCC 50%, #FFFFFF 65%, #00FFFF 100%)',
-          letterSpacing: '0.08em',
+          letterSpacing: '0.05em',
           filter: 'drop-shadow(0 0 30px rgba(0,255,255,0.6)) drop-shadow(0 0 60px rgba(0,255,255,0.3)) drop-shadow(0 0 100px rgba(0,255,255,0.15))',
         }}
         data-text={`${line1}\n${line2}`}

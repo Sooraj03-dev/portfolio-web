@@ -4,7 +4,11 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { skillCategories } from '../../data/skills';
 import { useGlitch } from '../../hooks/useGlitch';
 
+import { supabase } from '../../lib/supabase';
+
 gsap.registerPlugin(ScrollTrigger);
+
+// ... SkillCard remains unchanged ...
 
 function SkillCard({ skill, color, index }) {
   const [hovered, setHovered] = useState(false);
@@ -74,7 +78,38 @@ function SkillCard({ skill, color, index }) {
 export default function Skills() {
   const { ref: titleRef, text: titleText } = useGlitch('SKILL MATRIX', 1500);
   const sectionRef = useRef(null);
+  const [categories, setCategories] = useState(skillCategories);
   const [activeCategory, setActiveCategory] = useState(skillCategories[0].name);
+
+  const fetchSkills = async () => {
+    try {
+      const { data, error } = await supabase.from('skills').select('*').order('level', { ascending: false });
+      if (!error && data && data.length > 0) {
+        const grouped = skillCategories.map(mc => ({
+           ...mc,
+           skills: data.filter(d => d.category === mc.name).map(d => ({ name: d.name, level: d.level }))
+        }));
+        
+        const existingCatNames = skillCategories.map(mc => mc.name);
+        const newCatNames = [...new Set(data.filter(d => !existingCatNames.includes(d.category)).map(d => d.category))];
+        
+        const newCats = newCatNames.map((name) => ({
+           name,
+           color: '#00FFFF', // Default color
+           skills: data.filter(d => d.category === name).map(d => ({ name: d.name, level: d.level }))
+        }));
+        
+        setCategories([...grouped, ...newCats].filter(c => c.skills.length > 0));
+      }
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    fetchSkills();
+    const handleSync = () => fetchSkills();
+    window.addEventListener('skill-sync-pulse', handleSync);
+    return () => window.removeEventListener('skill-sync-pulse', handleSync);
+  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -83,7 +118,7 @@ export default function Skills() {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const scanline = section.querySelector('.skill-scanline');
     const cards = section.querySelectorAll('.skill-card');
-    const activeCategoryData = skillCategories.find((category) => category.name === activeCategory);
+    const activeCategoryData = categories.find((category) => category.name === activeCategory) || categories[0];
 
     if (!activeCategoryData) return;
 
@@ -155,9 +190,9 @@ export default function Skills() {
       if (tl.scrollTrigger) tl.scrollTrigger.kill();
       tl.kill();
     };
-  }, [activeCategory]);
+  }, [activeCategory, categories]);
 
-  const activeCategoryData = skillCategories.find((category) => category.name === activeCategory);
+  const activeCategoryData = categories.find((category) => category.name === activeCategory);
   const skillCount = activeCategoryData?.skills.length ?? 0;
   const averageLevel = activeCategoryData
     ? Math.round(activeCategoryData.skills.reduce((total, skill) => total + skill.level, 0) / activeCategoryData.skills.length)
@@ -183,7 +218,7 @@ export default function Skills() {
         <div className="mb-14 text-center">
           <h2
             ref={titleRef}
-            className="font-orbitron text-3xl font-bold uppercase tracking-cyber md:text-4xl neon-text-cyan"
+            className="font-orbitron text-xl sm:text-3xl font-bold uppercase tracking-cyber md:text-4xl neon-text-cyan break-all sm:break-normal"
             data-text={titleText}
           >
             {titleText || 'SKILL MATRIX'}
@@ -200,7 +235,7 @@ export default function Skills() {
 
           <div className="relative">
             <div className="mb-6 flex flex-wrap justify-center gap-3">
-              {skillCategories.map((category, index) => {
+              {categories.map((category, index) => {
                 const isActive = category.name === activeCategory;
 
                 return (

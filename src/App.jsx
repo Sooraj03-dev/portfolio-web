@@ -21,6 +21,8 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
 
+  const [currentTrack, setCurrentTrack] = useState('/music1.mp3');
+
   useEffect(() => {
     const armAutoplay = () => {
       if (!hasInteracted && audioRef.current) {
@@ -51,6 +53,20 @@ export default function App() {
     }
   };
 
+  const nextTrack = () => {
+    if (!audioRef.current) return;
+    const isCurrentlyPlaying = !audioRef.current.paused;
+    const newTrack = currentTrack === '/music1.mp3' ? '/music2.mp3' : '/music1.mp3';
+    setCurrentTrack(newTrack);
+    // After state update, play the new track if it was playing before
+    setTimeout(() => {
+      if (audioRef.current && isCurrentlyPlaying) {
+        audioRef.current.play().catch(() => {});
+        setIsPlaying(true);
+      }
+    }, 50);
+  };
+
   // Audio ducking during gameplay
   useEffect(() => {
     if (audioRef.current) {
@@ -72,6 +88,21 @@ export default function App() {
     }
   }, [gameActive]);
 
+  // Temporary ducking for SFX
+  useEffect(() => {
+    const handleDuck = () => {
+      if (!audioRef.current || gameActive) return;
+      audioRef.current.volume = 0.15;
+      setTimeout(() => {
+        if (audioRef.current && !gameActive) {
+          audioRef.current.volume = 0.35;
+        }
+      }, 1000);
+    };
+    window.addEventListener('duck-audio', handleDuck);
+    return () => window.removeEventListener('duck-audio', handleDuck);
+  }, [gameActive]);
+
   // Prevent hydration mismatch issues on load
   useEffect(() => {
     document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
@@ -79,13 +110,14 @@ export default function App() {
 
   return (
     <div className="relative w-full min-h-screen bg-void text-text-primary selection:bg-neon-cyan/30">
-      <audio ref={audioRef} src="/music1.mp3" loop preload="auto" />
+      <audio ref={audioRef} src={currentTrack} loop preload="auto" />
       <CustomCursor />
       <Navbar 
         terminalOpen={terminalOpen} 
         onToggleTerminal={() => setTerminalOpen((prev) => !prev)} 
         isPlaying={isPlaying}
         toggleMute={toggleMute}
+        onNextTrack={nextTrack}
       />
       
       <main className="relative z-10 w-full flex flex-col">

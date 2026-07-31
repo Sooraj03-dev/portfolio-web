@@ -6,8 +6,14 @@ export function useTypewriter(words, typeSpeed = 60, deleteSpeed = 30, pauseMs =
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
+    // Reset wordIndex if words array shrinks
+    if (wordIndex >= words.length) {
+      setWordIndex(0);
+      return;
+    }
+
     let timer;
-    const currentWord = words[wordIndex];
+    const currentWord = words[wordIndex] || '';
 
     if (isDeleting) {
       if (text === '') {

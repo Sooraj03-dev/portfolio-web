@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 
-export default function MusicToggle({ isPlaying, toggleMute }) {
-  const [isHovered, setIsHovered] = useState(false);
+export default function MusicToggle({ isPlaying, toggleMute, onNextTrack }) {
+  const [isHoveredMute, setIsHoveredMute] = useState(false);
+  const [isHoveredNext, setIsHoveredNext] = useState(false);
 
-  const buttonStyle = {
+  const buttonStyle = (isHovered, active) => ({
     width: '40px',
     height: '40px',
     background: 'rgba(0, 255, 255, 0.05)',
@@ -16,22 +17,39 @@ export default function MusicToggle({ isPlaying, toggleMute }) {
     justifyContent: 'center',
     cursor: 'pointer',
     transition: 'color 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease',
-    color: isPlaying ? '#00FFFF' : '#3A6A7A',
-    boxShadow: isPlaying ? '0 0 12px rgba(0, 255, 255, 0.4)' : 'none',
-  };
+    color: active ? '#00FFFF' : '#3A6A7A',
+    boxShadow: active ? '0 0 12px rgba(0, 255, 255, 0.4)' : 'none',
+  });
 
   return (
-    <button
-      type="button"
-      className="clickable"
-      style={buttonStyle}
-      onClick={toggleMute}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      title={isPlaying ? "Mute Music" : "Play Music"}
-      aria-label={isPlaying ? "Mute ambient background music" : "Play ambient background music"}
-    >
-      {isPlaying ? "♪" : "✕"}
-    </button>
+    <div className="flex gap-2">
+      <button
+        type="button"
+        className="clickable"
+        style={buttonStyle(isHoveredMute, isPlaying)}
+        onClick={toggleMute}
+        onMouseEnter={() => setIsHoveredMute(true)}
+        onMouseLeave={() => setIsHoveredMute(false)}
+        title={isPlaying ? "Mute Music" : "Play Music"}
+        aria-label={isPlaying ? "Mute ambient background music" : "Play ambient background music"}
+      >
+        {isPlaying ? "♪" : "✕"}
+      </button>
+      
+      {onNextTrack && (
+        <button
+          type="button"
+          className="clickable"
+          style={buttonStyle(isHoveredNext, false)}
+          onClick={onNextTrack}
+          onMouseEnter={() => setIsHoveredNext(true)}
+          onMouseLeave={() => setIsHoveredNext(false)}
+          title="Next Track"
+          aria-label="Next ambient background track"
+        >
+          ►►
+        </button>
+      )}
+    </div>
   );
 }

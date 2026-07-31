@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { useTypewriter } from '../../hooks/useTypewriter';
+import { supabase } from '../../lib/supabase';
 
-const ROLES = [
+const DEFAULT_ROLES = [
   "BUILDING ASTRA AI",
   "FULL STACK ENGINEER", 
   "ML ENGINEER",
@@ -9,7 +11,25 @@ const ROLES = [
 ];
 
 export default function RoleTypewriter() {
-  const currentText = useTypewriter(ROLES, 60, 30, 2000);
+  const [roles, setRoles] = useState(DEFAULT_ROLES);
+  
+  const fetchRoles = async () => {
+    try {
+      const { data, error } = await supabase.from('profile').select('hero_roles').eq('id', 1).single();
+      if (!error && data && data.hero_roles) {
+        setRoles(data.hero_roles.split(',').map(r => r.trim()));
+      }
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    fetchRoles();
+    const handleSync = () => fetchRoles();
+    window.addEventListener('profile-sync-pulse', handleSync);
+    return () => window.removeEventListener('profile-sync-pulse', handleSync);
+  }, []);
+
+  const currentText = useTypewriter(roles, 60, 30, 2000);
 
   return (
     <div className="hero-role mt-2 font-jetbrains text-[12px]">

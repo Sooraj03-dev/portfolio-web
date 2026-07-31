@@ -3,7 +3,11 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { timelineEntries } from '../../data/timeline';
 
+import { supabase } from '../../lib/supabase';
+
 gsap.registerPlugin(ScrollTrigger);
+
+// ... TypewriterYear ...
 
 function TypewriterYear({ text, isVisible }) {
   const [display, setDisplay] = useState('');
@@ -25,6 +29,23 @@ function TypewriterYear({ text, isVisible }) {
 export default function Timeline() {
   const sectionRef = useRef(null);
   const [visibleNodes, setVisibleNodes] = useState({});
+  const [entries, setEntries] = useState(timelineEntries);
+
+  const fetchTimeline = async () => {
+    try {
+      const { data, error } = await supabase.from('timeline').select('*').order('id', { ascending: true });
+      if (!error && data && data.length > 0) {
+        setEntries(data);
+      }
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    fetchTimeline();
+    const handleSync = () => fetchTimeline();
+    window.addEventListener('timeline-sync-pulse', handleSync);
+    return () => window.removeEventListener('timeline-sync-pulse', handleSync);
+  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -37,7 +58,7 @@ export default function Timeline() {
       gsap.set('.timeline-node', { background: '#00FFFF', boxShadow: '0 0 12px rgba(0,255,255,0.5)' });
       gsap.set('.timeline-card', { opacity: 1, x: 0 });
       const allVisible = {};
-      timelineEntries.forEach((_, i) => (allVisible[i] = true));
+      entries.forEach((_, i) => (allVisible[i] = true));
       setVisibleNodes(allVisible);
       return;
     }
@@ -122,12 +143,12 @@ export default function Timeline() {
         if (t.trigger === section || t.trigger.closest('#timeline')) t.kill();
       });
     };
-  }, []);
+  }, [entries.length]);
 
   return (
     <section id="timeline" ref={sectionRef} className="relative py-24 px-6 md:px-12" style={{ background: '#010308' }}>
       <div className="max-w-4xl mx-auto relative z-10">
-        <h2 className="font-orbitron text-3xl md:text-4xl font-bold uppercase tracking-cyber mb-4 neon-text-cyan text-center">
+        <h2 className="font-orbitron text-xl sm:text-3xl md:text-4xl font-bold uppercase tracking-cyber mb-4 neon-text-cyan text-center break-all sm:break-normal">
           // ACTIVITY_LOG
         </h2>
         <div className="w-24 h-px mx-auto mb-16" style={{ background: 'linear-gradient(to right, transparent, #00FFFF, transparent)' }} />
@@ -136,13 +157,13 @@ export default function Timeline() {
         <div className="timeline-container relative">
           
           {/* Background Dim Line */}
-          <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] bg-neon-cyan/10" />
+          <div className="absolute left-4 md:left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] bg-neon-cyan/10" />
           
           {/* Active Drawing Line */}
-          <div className="timeline-spine-active absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] origin-top" style={{ background: 'linear-gradient(to bottom, #00FFFF, #FF2D78)', boxShadow: '0 0 8px rgba(0,255,255,0.4)' }} />
+          <div className="timeline-spine-active absolute left-4 md:left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] origin-top" style={{ background: 'linear-gradient(to bottom, #00FFFF, #FF2D78)', boxShadow: '0 0 8px rgba(0,255,255,0.4)' }} />
 
           {/* Entries */}
-          {timelineEntries.map((entry, index) => {
+          {entries.map((entry, index) => {
             const isLeft = entry.side === 'left';
             
             return (
@@ -151,15 +172,15 @@ export default function Timeline() {
                 <div className="hidden md:block flex-1" />
 
                 {/* Hexagonal node on timeline */}
-                <div className="absolute left-1/2 -translate-x-1/2 z-20">
+                <div className="absolute left-4 md:left-1/2 -translate-x-1/2 z-20">
                   <div className="timeline-node hex-clip w-5 h-6 transition-colors duration-300" />
                 </div>
 
                 {/* Card side */}
-                <div className="flex-1 md:px-8 relative">
+                <div className="flex-1 pl-12 pr-0 md:px-8 relative w-full">
                   {/* Glitch Trail Element */}
                   <div 
-                    className="glitch-trail absolute top-1/2 -translate-y-1/2 h-1 z-0 pointer-events-none"
+                    className="glitch-trail absolute top-1/2 -translate-y-1/2 h-1 z-0 pointer-events-none hidden md:block"
                     style={{
                       background: 'linear-gradient(90deg, transparent, #00FFFF, #FF2D78)',
                       width: '100px',

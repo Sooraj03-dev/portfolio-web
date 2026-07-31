@@ -1,6 +1,25 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabase';
+
 export default function HeroSubtitle() {
-  const words = ['AI', 'ML', 'FULL STACK'];
+  const [words, setWords] = useState(['AI', 'ML', 'FULL STACK']);
   
+  const fetchSubtitle = async () => {
+    try {
+      const { data, error } = await supabase.from('profile').select('hero_subtitle').eq('id', 1).single();
+      if (!error && data && data.hero_subtitle) {
+        setWords(data.hero_subtitle.split(',').map(w => w.trim()));
+      }
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    fetchSubtitle();
+    const handleSync = () => fetchSubtitle();
+    window.addEventListener('profile-sync-pulse', handleSync);
+    return () => window.removeEventListener('profile-sync-pulse', handleSync);
+  }, []);
+
   return (
     <div 
       className="hero-subtitle mt-3 font-rajdhani font-semibold text-[14px] uppercase tracking-[0.35em]"
@@ -11,7 +30,7 @@ export default function HeroSubtitle() {
       }}
     >
       {words.map((word, i) => (
-        <span key={word}>
+        <span key={word + i}>
           {word}
           {i < words.length - 1 && (
             <span style={{ color: '#FF2D78' }}> &middot; </span>

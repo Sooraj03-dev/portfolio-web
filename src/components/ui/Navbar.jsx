@@ -11,7 +11,7 @@ const NAV_LINKS = [
   { label: 'CONTACT', href: '#contact' },
 ];
 
-export default function Navbar({ terminalOpen, onToggleTerminal, isPlaying, toggleMute }) {
+export default function Navbar({ terminalOpen, onToggleTerminal, isPlaying, toggleMute, onNextTrack }) {
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
 
@@ -42,13 +42,13 @@ export default function Navbar({ terminalOpen, onToggleTerminal, isPlaying, togg
   return (
     <>
       <nav
-        className="fixed top-0 left-0 w-full z-50 transition-all duration-300"
+        className="fixed top-0 left-0 w-full z-50 transition-all duration-300 pt-2 sm:pt-0"
         style={{
           background: scrolled ? 'rgba(1,3,8,0.88)' : 'rgba(1,3,8,0.0)',
           backdropFilter: scrolled ? 'blur(16px)' : 'none',
           WebkitBackdropFilter: scrolled ? 'blur(16px)' : 'none',
           borderBottom: scrolled ? '1px solid rgba(0,255,255,0.15)' : '1px solid transparent',
-          height: '64px',
+          height: '72px',
         }}
       >
         <div className="max-w-[1400px] mx-auto px-6 h-full flex items-center justify-between">
@@ -90,7 +90,7 @@ export default function Navbar({ terminalOpen, onToggleTerminal, isPlaying, togg
           </div>
 
           {/* Status Area */}
-          <div className="flex items-end gap-3">
+          <div className="flex items-center gap-2 md:items-end md:gap-3">
             <button
               type="button"
               className="clickable cyber-navbar-logo-btn"
@@ -101,9 +101,9 @@ export default function Navbar({ terminalOpen, onToggleTerminal, isPlaying, togg
               <span className="cyber-navbar-logo-mark">03X</span>
             </button>
 
-            <MusicToggle isPlaying={isPlaying} toggleMute={toggleMute} />
+            <MusicToggle isPlaying={isPlaying} toggleMute={toggleMute} onNextTrack={onNextTrack} />
 
-            <div className="flex flex-col items-end">
+            <div className="hidden md:flex flex-col items-end">
               <span className="font-jetbrains text-[9px] text-neon-pink tracking-widest flex items-center gap-1.5">
                 SYS: ONLINE <span className="text-text-dim">|</span> BUILD: v2.4.7
               </span>
