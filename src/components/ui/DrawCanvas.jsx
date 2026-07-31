@@ -16,31 +16,27 @@ export default function DrawCanvas() {
     window.addEventListener('resize', resize);
     resize();
 
+    let isDrawing = false;
     let points = [];
     let animationFrame;
     
-    const NEON_COLORS = [
-      '0, 255, 255',   // Cyan
-      '255, 45, 120',  // Pink
-      '176, 38, 255',  // Purple
-      '57, 255, 20',   // Green
-      '255, 234, 0'    // Yellow
-    ];
-    let currentColor = NEON_COLORS[0];
+    let hue = 0;
 
     const addPoint = (x, y) => {
       if (window.innerWidth <= 768) return; // Disabled on mobile
-      if (points.length === 0 || points[points.length - 1] === null) {
-        currentColor = NEON_COLORS[Math.floor(Math.random() * NEON_COLORS.length)];
-      }
+      
+      // Continuously shift hue while drawing
+      hue = (hue + 2) % 360; 
+      const currentColor = `hsl(${hue}, 100%, 50%)`;
+      
       points.push({ x, y, age: 0, color: currentColor });
     };
 
     const handleMouseMove = (e) => {
-      if (e.shiftKey) {
+      if (isDrawing) {
         addPoint(e.clientX, e.clientY);
       } else {
-        // if they release shift, insert a "break" point so it doesn't connect later
+        // if they release mouse, insert a "break" point so it doesn't connect later
         if (points.length > 0 && points[points.length - 1] !== null) {
           points.push(null);
         }
@@ -48,12 +44,12 @@ export default function DrawCanvas() {
     };
 
     const handleMouseDown = (e) => {
-      if (e.shiftKey) {
-        addPoint(e.clientX, e.clientY);
-      }
+      isDrawing = true;
+      addPoint(e.clientX, e.clientY);
     };
 
     const handleMouseUp = (e) => {
+      isDrawing = false;
       if (points.length > 0 && points[points.length - 1] !== null) {
         points.push(null);
       }
@@ -91,8 +87,8 @@ export default function DrawCanvas() {
           ctx.moveTo(p1.x, p1.y);
           ctx.lineTo(p2.x, p2.y);
           
-          ctx.shadowColor = `rgb(${p1.color})`;
-          ctx.strokeStyle = `rgba(${p1.color}, ${Math.max(0, life)})`;
+          ctx.shadowColor = p1.color;
+          ctx.strokeStyle = p1.color.replace('hsl', 'hsla').replace(')', `, ${Math.max(0, life)})`);
           ctx.lineWidth = 1 + (life * 4);
           ctx.stroke();
         }
